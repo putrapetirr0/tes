@@ -14,17 +14,39 @@ LIGHT='\033[0;37m'
 # Getting
 clear
 IP=$(wget -qO- ipinfo.io/ip);
-TIME=$("%H:%M:%S");
-domain=$(sed '/^$/d' /home/dom)
-rm /root/hasil
-if [[ "$domain" = "" ]]; then
-echo "Please enter your bot token"
-read -rp "domain : " -e domain
+domen=$(sed '/^$/d' /home/dom)
+rm -rf /root/$domen
+clear
+if [[ "$domen" = "" ]]; then
+echo "Please enter your domain"
+read -rp "domen : " -e domen
 cat <<EOF>>/home/dom
-$domain
+$domen
 EOF
 fi
 echo
-cd root
-knockpy $domain -o /root/hasil
+knockpy $domen -o /root/$domen
+cd /root
+zip -r $domen.zip $domen > /dev/null 2>&1
+######################## BOT INFO ############################
+BOT_TOKEN=$(sed '/^$/d' /home/botdet)
+CHAT_ID=$(sed '/^$/d' /home/chatdet)
+file_path=""
+ 
+# Function to send a file to Telegram
+send_file() {
+ local file_path="$domen.zip"
+ local caption="$2"
+ curl -s -X POST "https://api.telegram.org/bot$BOT_TOKEN/sendDocument" \
+ -F "chat_id=$CHAT_ID" \
+ -F "document=@$file_path" \
+ -F "caption=$caption"
+}
+send_file "$domen.zip" "Assalamualaikum 
+kawanku saya kirimkan file hasil pencarianku"
+rm -rf /home/dom
+rm -r /root/$domen
+rm -r /root/$domen.zip
+clear
+echo " ${ON_BLUE} cek file di telegram grup.... ${STD}"
 clear
